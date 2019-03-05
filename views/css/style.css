@@ -1,0 +1,34 @@
+.login, .signIn {
+	width: 40% !important;
+	margin: 40px auto;
+}
+.submit-div, .formError {
+	text-align: center;
+}
+.formError {
+	color: #a94442;
+	margin-top: 10px;
+	font-weight: bold;
+}
+.errorMessage {
+	color: #a94442;
+	float: right;
+}
+#image {
+	display: none;
+}
+#imageLabel + span {
+	top: 7px;
+}
+#imageContent {
+	float: right;
+}
+.imageLabel {
+	border: solid 4px white;
+    border-radius: 5px;
+    text-align: center !important;
+    margin-top: 5px;
+    margin-right: 5px;
+    cursor: pointer;
+    width: 100%;
+}
