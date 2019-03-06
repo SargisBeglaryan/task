@@ -28,8 +28,7 @@ require_once(ROOT.'/views/layouts/header.php');
             <div class="form-group row">
               <label for="loginPassword" class="col-sm-2 col-form-label">Password</label>
               <div class="col-sm-10">
-                <input type="password" name="loginPassword" class="form-control <?php if(isset($errors['password'])) echo 'is-invalid'; ?>" id="loginPassword" placeholder="Password"
-                 value="<?php if(isset($_POST['loginPassword'])){ echo $_POST['loginPassword'];}?>">
+                <input type="password" name="loginPassword" class="form-control <?php if(isset($errors['password'])) echo 'is-invalid'; ?>" id="loginPassword" placeholder="Password">
                  <?php
                   if(isset($errors['password'])) {
                     echo "<span class='invalid-feedback' role='alert'>
@@ -43,10 +42,12 @@ require_once(ROOT.'/views/layouts/header.php');
               <div class="col-sm-12 text-center">
                 <button type="submit" name="login" class="btn btn-success">Login</button>
               </div>
+              <div class="col-sm-12 mt-4">
                 <?php if(isset($errors['user'])){ 
                   echo '<div class="alert alert-danger" role="alert"><strong>'.$errors['user'].'</strong></div>';
                 }
                 ?>
+              </div>
             </div>
           </form>
         </div>

@@ -57,7 +57,7 @@ require_once(ROOT.'/views/layouts/header.php');
               <label for="signInPassword" class="col-sm-2 col-form-label">Password</label>
               <div class="col-sm-10">
                 <input type="password" name="signInPassword" class="form-control <?php if(isset($errors['password']))  echo 'is-invalid'; ?>" id="signInPassword" placeholder="Password"
-                 value="<?php if(isset($_POST['signInPassword'])){ echo $_POST['signInPassword'];}?>">
+                 >
                  <?php
                   if(isset($errors['password'])) {
                     echo "<span class='invalid-feedback' role='alert'>

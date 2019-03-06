@@ -7,24 +7,49 @@ class Users {
 	protected $email;
 	protected $password;
 
-	public  function login($email, $password) {
+
+	public function __construct() {
+
+		if(!empty($_POST)) {
+			foreach ($_POST as $key => $value) {
+				if($key == 'name' || $key == 'surname') {
+					$value = $this->stringFilter($value);
+					$this->{$key} = $value;
+				}
+				if(strpos(strtolower($key), 'email') !== false) {
+					$email = filter_var($_POST[$key], FILTER_SANITIZE_EMAIL);
+					$this->email = $email;
+				}
+				if(strpos(strtolower($key), 'password') !== false) {
+					$password = $this->stringFilter($value);
+					$this->password = $password;
+				}
+			}
+		}
+	}
+
+	public  function login() {
 
 		if($this->email && $this->password) {
 
 			$db = Db::getConnection();
-			$query = $db->prepare("SELECT id, surname, name, email FROM users WHERE email = :email AND password = :password");
-		    $query->bindParam(':email', $email);
+			$query = $db->prepare("SELECT id, password, surname, name, email FROM users WHERE email = :email");
+		    $query->bindParam(':email', $this->email);
 		    $query->setFetchMode(PDO::FETCH_ASSOC);
 		    $query->execute();
 		    if($query->rowCount()){
 		    	$user = $query->fetch();
-				// if(password_verify($password, $b))
+				if(!password_verify($this->password, $user['password'])) {
+					$this->error['user'] = "User not found";
+					return false;
+				}
 		    	return $user;
 		    } else {
 		    	$this->error['user'] = "User not found";
 		    	return false;
 		    }
 		} else {
+			$this->error['user'] = "User not found";
 			return false;
 		}
 	}
@@ -97,6 +122,16 @@ class Users {
 		    $this->error['email'] = 'Email format is wrong';
 			return false;
 		}
+
+		$db = Db::getConnection();
+		$query = $db->prepare("SELECT email FROM users WHERE email = :email");
+	    $query->bindParam(':email', $email);
+	    $query->setFetchMode(PDO::FETCH_ASSOC);
+	    $query->execute();
+	    if($query->rowCount()){
+			$this->error['email'] = 'Email has already been taken';
+			return false;
+	    }
 		$this->email = $email;
 		return true;
 	}

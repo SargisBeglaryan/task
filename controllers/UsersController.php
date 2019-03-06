@@ -21,26 +21,24 @@ class UsersController {
 	}
 
 	public function showLogin(){
+
+		if(isset($_SESSION['user_id'])) {
+			return header("Location: /".WEBSITE."/".$_SESSION['user_id']);
+		}
 		require(ROOT . '/views/auth/login.php');
 		return true;
 	}
 	public function login(){
-		$errors;
+
 		if ($_SERVER["REQUEST_METHOD"] == "POST"){
-			$errors = $this->userModel->validate($_POST);
-			if(count($errors) > 0) {
-				require(ROOT . '/views/auth/register.php');
-				return false;
+			$user = $this->userModel->login();
+			if($user){
+				$_SESSION['user_id'] = $user['id'];
+				$_SESSION['email'] = $user['email'];
+				$_SESSION['name'] = $user['name'];
+				return header("Location: /".WEBSITE."/".$user['id']);
 			} else {
-				$user = $this->userModel->login($_POST['loginEmail'], $_POST['loginPassword']);
-				if($user){
-					$_SESSION['password'] = $user['password'];
-					$_SESSION['email'] = $user['email'];
-					$_SESSION['name'] = $user['name'];
-					return header("Location: /".WEBSITE."/index/".$user['id']);
-				} else {
-					$errors = $this->userModel->error;
-				}
+				$errors = $this->userModel->error;
 			}
 		}
 
@@ -49,6 +47,10 @@ class UsersController {
 	}
 
 	public function showRegister(){
+
+		if(isset($_SESSION['user_id'])) {
+			return header("Location: /".WEBSITE."/".$_SESSION['user_id']);
+		}
 		require(ROOT . '/views/auth/register.php');
 		return true;
 	}
