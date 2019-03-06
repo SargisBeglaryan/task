@@ -15,13 +15,17 @@ class Router
 // Return type
 
 	public static function get($path) {
-		self::$routes[$path[0]] = $path[1];
-		self::$method = 'GET';
+		if($_SERVER['REQUEST_METHOD'] == 'GET') {
+			self::$routes[$path[0]] = $path[1];
+			self::$method = 'GET';
+		}
 	}
 
 	public static function post($path) {
-		self::$routes[$path[0]] = $path[1];
-		self::$method = 'POST';
+		if($_SERVER['REQUEST_METHOD'] == 'POST') {
+			self::$routes[$path[0]] = $path[1];
+			self::$method = 'POST';
+		}
 	}
 
 	private function getURI()
@@ -34,11 +38,11 @@ class Router
 	public function run()
 	{
 		$url = $this->getURI();
-		if($url == '') {
-			$url = '/';
+		if($url == '' || (int)$url > 0) {
+
+			$url = '/'.$url;
 		}
 		foreach (self::$routes as $urlPattern => $path) {
-
 			if(preg_match("~$urlPattern~", $url)) {
 
 				$internalRoute = preg_replace("~$urlPattern~", $path, $url);

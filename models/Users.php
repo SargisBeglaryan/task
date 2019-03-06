@@ -2,21 +2,23 @@
 class Users {
 
 	public $error = [];
+	protected $name;
+	protected $surname;
+	protected $email;
+	protected $password;
 
 	public  function login($email, $password) {
-		$email = $this->emailValidate($email);
-		$password = $this->passwordValidate($password);
-		if($email && $password) {
-			$hashPassword = md5($password);
+
+		if($this->email && $this->password) {
+
 			$db = Db::getConnection();
 			$query = $db->prepare("SELECT id, surname, name, email FROM users WHERE email = :email AND password = :password");
 		    $query->bindParam(':email', $email);
-		    $query->bindParam(':password', $hashPassword);
 		    $query->setFetchMode(PDO::FETCH_ASSOC);
 		    $query->execute();
 		    if($query->rowCount()){
 		    	$user = $query->fetch();
-		    	$user['password'] = $password;
+				// if(password_verify($password, $b))
 		    	return $user;
 		    } else {
 		    	$this->error['user'] = "User not found";
@@ -27,51 +29,61 @@ class Users {
 		}
 	}
 
-	public function signIn(){
-		$email = $this->emailValidate($_POST['signInEmail']);
-		$password = $this->passwordValidate($_POST['signInPassword']);
-		$name = $this->nameValidate($_POST['name'], 'name');
-		$surname = $this->nameValidate($_POST['surname'], 'surname');
-		if(isset($_FILES['image']) && $_FILES['image']['error'] != 4){
-			$image = $this->imageValidate($_FILES['image']);
-		} else {
-			$image = false;
-			$this->error['image'] = "You dont opload image";
-		}
-		if($email && $password && $name && $surname && $image){
-			$hashPassword = md5($password);
+	public function register(){
+
+		if($this->email && $this->password && $this->name && $this->surname){
+			$hashPassword = password_hash($this->password, PASSWORD_DEFAULT);
 			$db = Db::getConnection();
-			$query = $db->prepare("INSERT INTO users (name, surname, email, password, image) 
-				VALUES (:name, :surname, :email, :password, :image)");
-		    $query->bindParam(':name', $name);
-		    $query->bindParam(':surname', $surname);
-		    $query->bindParam(':email', $email);
+			$query = $db->prepare("INSERT INTO users (name, surname, email, password)
+				VALUES (:name, :surname, :email, :password)");
+		    $query->bindParam(':name', $this->name);
+		    $query->bindParam(':surname', $this->surname);
+		    $query->bindParam(':email', $this->email);
 		    $query->bindParam(':password', $hashPassword);
-		    $query->bindParam(':image', $image);
 		    $query->setFetchMode(PDO::FETCH_ASSOC);
 		    $query->execute();
 		    if($query->rowCount()){
-		    	return $this->login($email, $password);
+				$id = $db->lastInsertId();
+				return [
+					'id'=> $id,
+					'name'=>$this->name,
+					'surname'=>$this->surname,
+					'email'=>$this->email
+				];
 		    } else {
-		    	$this->deleteImage($image);
 		    	$this->error['userAdded'] = "Error! User not added";
 		    	return false;
 		    }
 		} else {
-			$this->deleteImage($image);
 			return false;
 		}
+	}
+
+	public function validate($request) {
+		foreach($request as $key=>$value) {
+			if($key == 'name' || $key == 'surname') {
+				$this->nameValidate($value, $key);
+			}
+			if(strpos(strtolower($key), 'email') !== false) {
+			    $this->emailValidate($value);
+			}
+			if(strpos(strtolower($key), 'password') !== false) {
+			    $this->passwordValidate($value);
+			}
+		}
+		return $this->error;
 	}
 	private function nameValidate($name, $input){
 		$name = $this->stringFilter($name);
 		if($name == ''){
-			$this->error[$input] = 'Field is empty';
+			$this->error[$input] = ucfirst($input).' is empty';
 			return false;
 		}elseif(strlen($name) < 3){
-			$this->error[$input] = 'Field must have minimum 3 symboles';
+			$this->error[$input] = ucfirst($input). ' must have minimum 3 symboles';
 			return false;
 		}
-	    return $name;
+		$this->{$input} = $name;
+	    return true;
 	}
 
 	private function emailValidate($email) {
@@ -85,10 +97,12 @@ class Users {
 		    $this->error['email'] = 'Email format is wrong';
 			return false;
 		}
-		return $email;
+		$this->email = $email;
+		return true;
 	}
 
 	private function passwordValidate($password) {
+
 		$password = $this->stringFilter($password);
 		if($password == ''){
 			$this->error['password'] = 'Password field is empty';
@@ -108,7 +122,8 @@ class Users {
 	        $this->error['password'] = "Your Password Must Contain At Least 1 Lowercase Letter!";
 	        return false;
 	    }
-	    return $password;
+	    $this->password = $password;
+		return true;
 	}
 
 	private function stringFilter($string) {
@@ -117,32 +132,6 @@ class Users {
 		$string = filter_var($string, FILTER_SANITIZE_STRING);
 		return $string;
 	}
-
-	private function imageValidate($data){
-       $format = pathinfo($data['name']);
-       $imageFormat = array('png', 'jpg', 'PNG', 'JPG', 'JPEG', 'jpeg');
-       if(isset($format['extension']) &&  !in_array($format["extension"], $imageFormat)){
-	       	$this->error['image'] = "Image format is wrong";
-	        return false;
-       }
-       elseif ($data["size"] > 500000) {
-		    $this->error['image'] = "Sorry, your images size large than 5mb";
-		    return false;
-		} else {
-          if(move_uploaded_file($data["tmp_name"], ROOT .'/images/'.$data['name'])) { 
-            	return '/images/'.$data['name'];
-	       } else {
-	        	return false;
-	       }
-       }
-       
-    }
-
-    private function deleteImage($image){
-    	if($image != false){
-    		unlink(ROOT.$image);
-    	}
-    }
 
 }
 
