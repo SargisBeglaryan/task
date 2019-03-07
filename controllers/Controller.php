@@ -15,11 +15,13 @@ class Controller {
 			$this->_token = $token;
 			$_SESSION['_token'] = $token;
 		}
+
+		$this->_token = $_SESSION['_token'];
 	}
 
 	protected function checkActivity() {
 
-		if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 3600)) {
+		if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {
 		    session_unset();
 		    session_destroy();
 		}

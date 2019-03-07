@@ -11,6 +11,7 @@ class Users extends Model {
 	protected $surname;
 	protected $email;
 	protected $password;
+	protected $table = 'users';
 
 
 	public function __construct() {

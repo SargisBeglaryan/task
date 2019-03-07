@@ -4,6 +4,8 @@ namespace models;
 
 class Model {
 
+	protected $table;
+
 	public function __construct() {
 
 		if($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -21,8 +23,7 @@ class Model {
 	}
 
 	public function getById($id) {
-
-		$table = strtolower(get_class($this));
+		$table = ($this->table == null) ? strtolower(get_class($this)) : $this->table;
 		$db = \Db::getConnection();
 		$query = $db->prepare("SELECT * FROM $table WHERE id = :id");
 		$query->bindParam(':id', $id);
