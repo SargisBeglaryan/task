@@ -1,5 +1,10 @@
 <?php
-class Users {
+
+require_once ROOT. '/models/Model.php';
+
+Use models\Model;
+
+class Users extends Model {
 
 	public $error = [];
 	protected $name;
@@ -10,6 +15,7 @@ class Users {
 
 	public function __construct() {
 
+		parent::__construct();
 		if(!empty($_POST)) {
 			foreach ($_POST as $key => $value) {
 				if($key == 'name' || $key == 'surname') {
@@ -33,7 +39,7 @@ class Users {
 		if($this->email && $this->password) {
 
 			$db = Db::getConnection();
-			$query = $db->prepare("SELECT id, password, surname, name, email FROM users WHERE email = :email");
+			$query = $db->prepare("SELECT * FROM users WHERE email = :email");
 		    $query->bindParam(':email', $this->email);
 		    $query->setFetchMode(PDO::FETCH_ASSOC);
 		    $query->execute();

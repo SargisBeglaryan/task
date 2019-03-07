@@ -1,19 +1,24 @@
 <?php
-require_once ROOT. '/models/Users.php';
-session_start();
 
-class UsersController {
+require_once ROOT. '/models/Users.php';
+require_once ROOT. '/controllers/Controller.php';
+
+Use controllers\Controller;
+
+class UsersController extends Controller {
 
 	public $userModel;
 
 	public function __construct(){
+		parent::__construct();
 		$this->userModel= new Users(); 
 	}
 	public function index($id = null){
 
 		if(isset($_SESSION['user_id']) && $_SESSION['user_id'] == $id){
-			echo 'Hello '. $_SESSION['name'];
-			echo "<a href='/".WEBSITE."/logout'>Logout</a>";
+			$user =  $this->userModel->getById($id);
+			echo 'Hello '. $user['name'];
+			echo " <a href='/".WEBSITE."/logout'>Logout</a>";
 			return true;
 		} else {
 			return header("Location: /".WEBSITE."/login");
@@ -34,8 +39,6 @@ class UsersController {
 			$user = $this->userModel->login();
 			if($user){
 				$_SESSION['user_id'] = $user['id'];
-				$_SESSION['email'] = $user['email'];
-				$_SESSION['name'] = $user['name'];
 				return header("Location: /".WEBSITE."/".$user['id']);
 			} else {
 				$errors = $this->userModel->error;
@@ -65,8 +68,6 @@ class UsersController {
 				$user = $this->userModel->register();
 				if($user){
 					$_SESSION['user_id'] = $user['id'];
-					$_SESSION['email'] = $user['email'];
-					$_SESSION['name'] = $user['name'];
 					return header("Location: /".WEBSITE.'/'.$user['id']);
 				} else {
 					$errors = $this->userModel->error;
@@ -79,7 +80,7 @@ class UsersController {
 
 	public function logout(){
 
-		session_destroy();
+		unset($_SESSION['user_id']);
 		return header("Location: /".WEBSITE."/login");
 
 	}

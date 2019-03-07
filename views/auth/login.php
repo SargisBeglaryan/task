@@ -11,6 +11,7 @@ require_once(ROOT.'/views/layouts/header.php');
         <div class="card-body">
           <div class="mt-2 mb-5 text-center">Don't have an account? <a class="btn btn-link pt-0" href="/<?php echo WEBSITE; ?>/register">Sign up</a></div>
           <form action="/<?php echo WEBSITE; ?>/login" method="post">
+            <?php $this->getToken(); ?>
             <div class="form-group row">
               <label for="loginEmail" class="col-sm-2 col-form-label">Email</label>
               <div class="col-sm-10">
